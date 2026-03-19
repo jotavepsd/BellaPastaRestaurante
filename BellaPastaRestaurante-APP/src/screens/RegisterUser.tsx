@@ -1,16 +1,57 @@
+import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View, Alert, Platform } from "react-native";
 import { RootStackParamList } from "../../app/(tabs)/index";
+import React, { useState } from "react";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { ref, set} from "firebase/database";
+import { auth, database } from "../services/connectionFirebase";
+
+
+
+const {width, height} = Dimensions.get("window");
+
 
 type NavProp = StackNavigationProp<RootStackParamList>
 
 
-export default function Index(){
+export default function RegisterUser(){
+
+    const navigation = useNavigation<NavProp>();
+
+    const [name, setName] = useState<string>("");
+    const [cellphone, setCellphone] = useState<string>("");
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+
+
     return(
     <View style={styles.container}>
                     
         <View style={styles.faixaVerde} />
         <View style={styles.faixaVermelha}/>
+
+        <View style={styles.content}>
+
+            <Image                
+                source={require('../../assets/logo_bella_pasta.png')} 
+                style={styles.logo}
+                resizeMode="contain"
+            />
+
+            <input placeholder="Nome" style={styles.input}>
+            
+            </input>
+            <input placeholder="Telefone" style={styles.input}>
+            
+            </input> 
+            <input placeholder="Email" style={styles.input}>
+            
+            </input> 
+            <input placeholder="Senha" style={styles.input}>
+            
+            </input>               
+        </View>
 
     </View>
     );
@@ -22,6 +63,24 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    input: {
+        padding: 12,
+        width: 250,
+        margin: 10,
+    },
+    content: {
+    flex: 1, 
+    alignItems: 'center',
+    justifyContent: 'center', 
+    width: '100%',
+    paddingHorizontal: 20,
+    },
+        logo: {
+        width: width * 0.5,
+        height: width * 0.5,
+        bottom: 100,
+        left: 5
     },
         faixaVerde: {
         position: 'absolute',
@@ -43,6 +102,6 @@ const styles = StyleSheet.create({
         borderLeftWidth: width * 0.4,
         borderBottomWidth: height * 0.2,
         borderLeftColor: 'transparent',
-        borderBottomColor: '#FF3131',
+        borderBottomColor: '#FF3131'
     }
 });

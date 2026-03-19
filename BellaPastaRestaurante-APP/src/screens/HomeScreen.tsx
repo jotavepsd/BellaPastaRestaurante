@@ -1,5 +1,6 @@
+import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View, Pressable } from "react-native";
 import { RootStackParamList } from "../../app/(tabs)/index";
 
 const { width, height } = Dimensions.get('window');
@@ -7,6 +8,9 @@ const { width, height } = Dimensions.get('window');
 type NavProp = StackNavigationProp<RootStackParamList>
 
 export default function Index() {
+
+    const navigation = useNavigation<NavProp>();
+
     return (
         <View style={styles.container}>
             
@@ -26,15 +30,16 @@ export default function Index() {
 
                 
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={[styles.button, styles.bgGreen]}>
+                    <Pressable style={[styles.button, styles.bgGreen]}>
                         <Text style={styles.buttonText}>Login</Text>
-                    </TouchableOpacity>
+                    </Pressable>
 
                     <Text style={styles.ou}>ou</Text>
 
-                    <TouchableOpacity style={[styles.button, styles.bgRed]}>
+                    <Pressable style={[styles.button, styles.bgRed]} onPress={() => navigation.navigate("RegisterUser")}>
+                        
                         <Text style={styles.buttonText}>Cadastre-se</Text>
-                    </TouchableOpacity>
+                    </Pressable>
                 </View>
 
                 <Text style={styles.footerText}>©Política de privacidade</Text>
@@ -50,11 +55,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    content: {
-        alignItems: 'center',
-        width: '100%',
-        paddingHorizontal: 20,
-    },
+content: {
+    flex: 1, 
+    alignItems: 'center',
+    justifyContent: 'center', 
+    width: '100%',
+    paddingHorizontal: 20,
+},
     principal: {
         fontSize: 32,
         fontWeight: 'bold',
