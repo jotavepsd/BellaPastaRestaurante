@@ -136,7 +136,10 @@ export default function RegisterUser(){
                 <Text style={styles.buttonText}>Cadastre-se</Text>
             </Pressable>
 
-            <Text style={styles.footerText}>Já possui conta? Entrar</Text>
+          <Pressable onPress={() => navigation.navigate("LoginUser")}>
+            <Text style={styles.footerText}>Já possui conta? 
+              <Text style={{ fontWeight: "bold" }}>Entrar</Text></Text>
+          </Pressable>
 
         </View>
 
@@ -170,11 +173,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#00B14F',
     },
     input: {
-        padding: 12,
-        width: 250,
-        margin: 10,
-        borderWidth: 1,
-        
+    padding: 12,
+    width: 250,
+    margin: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
     },
         footerText: {
         marginTop: 20,

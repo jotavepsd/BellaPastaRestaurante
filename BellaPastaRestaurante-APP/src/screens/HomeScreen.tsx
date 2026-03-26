@@ -30,7 +30,7 @@ export default function Index() {
 
                 
                 <View style={styles.buttonContainer}>
-                    <Pressable style={[styles.button, styles.bgGreen]}>
+                    <Pressable style={[styles.button, styles.bgGreen]} onPress={() => navigation.navigate("LoginUser")}>
                         <Text style={styles.buttonText}>Login</Text>
                     </Pressable>
 

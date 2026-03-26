@@ -1,11 +1,15 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "../../src/screens/HomeScreen";
 import RegisterUser from "../../src/screens/RegisterUser";
+import LoginUser from "../../src/screens/LoginUser";
+import TelaInicial from "../../src/screens/InicialScreen";
 
 
 export type RootStackParamList = {
     HomeScreen: undefined;
     RegisterUser: undefined;
+    LoginUser: undefined;
+    InicialScreen: undefined
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -23,6 +27,15 @@ export default function RootStack() {
         <Stack.Screen
                 name="RegisterUser"
                 component={RegisterUser}/>
+
+        <Stack.Screen
+                name="LoginUser"
+                component={LoginUser}/>
+
+        <Stack.Screen
+                name="InicialScreen"
+                component={TelaInicial}/>
+
             </Stack.Navigator>
 
 
