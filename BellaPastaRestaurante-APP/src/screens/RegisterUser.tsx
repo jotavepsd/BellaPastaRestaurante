@@ -137,8 +137,8 @@ export default function RegisterUser(){
             </Pressable>
 
           <Pressable onPress={() => navigation.navigate("LoginUser")}>
-            <Text style={styles.footerText}>Já possui conta? 
-              <Text style={{ fontWeight: "bold" }}>Entrar</Text></Text>
+            <Text style={styles.footerText}>
+              Já possui conta? <Text style={{ fontWeight: "bold" }}>Entrar</Text></Text>
           </Pressable>
 
         </View>

@@ -26,7 +26,7 @@ export default function TelaInicial() {
       const user = auth.currentUser;
       
       if (user) {
-        // Usando a mesma chave que você definiu no cadastro: "users " + uid
+        
         const userRef = ref(database, "users " + user.uid);
         
         try {
@@ -59,6 +59,9 @@ export default function TelaInicial() {
           <View style={{ alignItems: 'center' }}>
             <Text style={styles.userName}>Olá, {nome || "Usuário"}</Text>
             <Text style={styles.userPhone}>{telefone || "Sem telefone"}</Text>
+            <br></br>
+            <br></br>
+            <Text onPress={() => navigation.navigate("HomeScreen")}>Sair</Text>
           </View>
         )}
       </View>
@@ -107,7 +110,7 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#00B14F",
+    color: "#000000",
     marginTop: 10,
   },
   userPhone: {
