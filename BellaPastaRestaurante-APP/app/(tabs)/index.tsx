@@ -3,13 +3,14 @@ import HomeScreen from "../../src/screens/HomeScreen";
 import RegisterUser from "../../src/screens/RegisterUser";
 import LoginUser from "../../src/screens/LoginUser";
 import TelaInicial from "../../src/screens/InicialScreen";
-
+import PerfilScreen from "../../src/screens/PerfilScreen";
 
 export type RootStackParamList = {
     HomeScreen: undefined;
     RegisterUser: undefined;
     LoginUser: undefined;
-    InicialScreen: undefined
+    InicialScreen: undefined;
+    PerfilScreen: undefined
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -36,6 +37,9 @@ export default function RootStack() {
                 name="InicialScreen"
                 component={TelaInicial}/>
 
+        <Stack.Screen
+                name="PerfilScreen"
+                component={PerfilScreen}/>
             </Stack.Navigator>
 
 

@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View, Pressable } from "react-native";
+import { Dimensions, Image, StyleSheet, Text, View, Pressable } from "react-native";
 import { RootStackParamList } from "../../app/(tabs)/index";
 
 const { width, height } = Dimensions.get('window');
@@ -36,7 +36,8 @@ export default function Index() {
 
                     <Text style={styles.ou}>ou</Text>
 
-                    <Pressable style={[styles.button, styles.bgRed]} onPress={() => navigation.navigate("RegisterUser")}>
+                    <Pressable style={[styles.button, styles.bgRed]} 
+                    onPress={() => navigation.navigate("RegisterUser")}>
                         
                         <Text style={styles.buttonText}>Cadastre-se</Text>
                     </Pressable>

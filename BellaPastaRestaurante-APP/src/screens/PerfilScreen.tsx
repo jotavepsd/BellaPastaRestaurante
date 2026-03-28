@@ -1,10 +1,14 @@
-import React from "react";
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../app/(tabs)/index";
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
+
+// Importações do Firebase Realtime Database
+import { auth, database } from "../services/connectionFirebase";
+import { ref, get } from "firebase/database";
 
 const { width, height } = Dimensions.get("window");
 
@@ -13,14 +17,54 @@ type NavProp = StackNavigationProp<RootStackParamList>;
 export default function TelaInicial() {
   const navigation = useNavigation<NavProp>();
 
+  const [nome, setNome] = useState<string>("");
+  const [telefone, setTelefone] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function carregarDados() {
+      const user = auth.currentUser;
+      
+      if (user) {
+        // Usando a mesma chave que você definiu no cadastro: "users " + uid
+        const userRef = ref(database, "users " + user.uid);
+        
+        try {
+          const snapshot = await get(userRef);
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            setNome(data.name);
+            setTelefone(data.cellphone);
+          }
+        } catch (error) {
+          console.error("Erro ao buscar dados do banco:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    }
+
+    carregarDados();
+  }, []);
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}></View>
-
-      <Text style={styles.text}>Tela Inicial - Bella Pasta</Text>
+      
+      <View style={styles.profileSection}>
+        <Ionicons name="person-circle" size={150} color="#00B14F"/>
+        
+        {loading ? (
+          <ActivityIndicator size="large" color="#00B14F" />
+        ) : (
+          <View style={{ alignItems: 'center' }}>
+            <Text style={styles.userName}>Olá, {nome || "Usuário"}</Text>
+            <Text style={styles.userPhone}>{telefone || "Sem telefone"}</Text>
+          </View>
+        )}
+      </View>
 
       <View style={styles.faixaMenu}>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("InicialScreen")}>
           <Entypo name="home" size={24} color="white" />
           <Text style={styles.menuText}>Menu</Text>
         </TouchableOpacity>
@@ -40,8 +84,7 @@ export default function TelaInicial() {
           <Text style={styles.menuText}>Reserva</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem}
-        onPress={() => navigation.navigate("PerfilScreen")}>
+        <TouchableOpacity style={styles.menuItem}>
           <Ionicons name="person" size={24} color="white" />
           <Text style={styles.menuText}>Perfil</Text>
         </TouchableOpacity>
@@ -57,17 +100,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  text: {
-    fontSize: 20,
+  profileSection: {
+    alignItems: "center",
+    bottom: 50,
+  },
+  userName: {
+    fontSize: 24,
     fontWeight: "bold",
     color: "#00B14F",
+    marginTop: 10,
   },
-  header: {
-    position: "absolute",
-    top: 0,
-    width: "100%",
-    height: height * 0.25,
-    backgroundColor: "#00B14F",
+  userPhone: {
+    fontSize: 18,
+    color: "#666",
+    marginTop: 5,
   },
   faixaMenu: {
     position: "absolute",
