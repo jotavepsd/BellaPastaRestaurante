@@ -90,6 +90,21 @@ export default function PerfilScreen() {
               <Text style={styles.editButtonText}>Editar Perfil</Text>
             </TouchableOpacity>
 
+           
+            <TouchableOpacity 
+              onPress={() => navigation.navigate("CadastroProduto")} 
+              style={styles.cadastroButton}
+            >
+              <Text style={styles.cadastroButtonText}>+ Cadastrar Produto</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+          onPress={() => navigation.navigate("GerenciarProduto")} 
+          style={styles.gerenciarButton}>
+
+          <Text style={styles.gerenciarButtonText}>Gerenciar Produtos</Text>
+</TouchableOpacity>
+
             <TouchableOpacity onPress={() => navigation.navigate("HomeScreen")} style={{ marginTop: 20 }}>
               <Text style={{ color: 'red' }}>Sair</Text>
             </TouchableOpacity>
@@ -189,6 +204,17 @@ const styles = StyleSheet.create({
     color: '#00B14F',
     fontWeight: '600'
   },
+  cadastroButton: {
+    marginTop: 15,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#00B14F',
+  },
+  cadastroButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600'
+  },
   faixaMenu: {
     position: "absolute",
     bottom: 0,
@@ -254,5 +280,16 @@ const styles = StyleSheet.create({
   btnText: {
     color: 'white',
     fontWeight: 'bold',
-  }
+  },
+  gerenciarButton: {
+  marginTop: 10,
+  paddingHorizontal: 20,
+  paddingVertical: 8,
+  borderRadius: 20,
+  backgroundColor: '#FF8C00', 
+},
+gerenciarButtonText: {
+  color: '#FFFFFF',
+  fontWeight: '600'
+},
 });

@@ -4,13 +4,17 @@ import RegisterUser from "../../src/screens/RegisterUser";
 import LoginUser from "../../src/screens/LoginUser";
 import TelaInicial from "../../src/screens/InicialScreen";
 import PerfilScreen from "../../src/screens/PerfilScreen";
+import CadastroProduto from "../../src/screens/CadastroProduto";
+import GerenciarProduto from "../../src/screens/GerenciarProduto";
 
 export type RootStackParamList = {
     HomeScreen: undefined;
     RegisterUser: undefined;
     LoginUser: undefined;
     InicialScreen: undefined;
-    PerfilScreen: undefined
+    PerfilScreen: undefined;
+    CadastroProduto: undefined;
+    GerenciarProduto: undefined
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -40,6 +44,14 @@ export default function RootStack() {
         <Stack.Screen
                 name="PerfilScreen"
                 component={PerfilScreen}/>
+
+        <Stack.Screen
+                name="CadastroProduto"
+                component={CadastroProduto}/>
+
+        <Stack.Screen
+                name="GerenciarProduto"
+                component={GerenciarProduto}/>
             </Stack.Navigator>
 
 

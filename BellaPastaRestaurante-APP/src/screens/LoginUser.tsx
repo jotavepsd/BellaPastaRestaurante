@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 15,
-    width: 150,
+    width: 250,
   },
   bgGreen: {
     backgroundColor: "#00B14F",
