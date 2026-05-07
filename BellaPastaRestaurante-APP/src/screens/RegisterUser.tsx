@@ -130,7 +130,8 @@ export default function RegisterUser(){
 
             <TextInput placeholder="Senha" style={styles.input}
             value={password}
-            onChangeText={setPassword}/>
+            onChangeText={setPassword}
+            secureTextEntry/>
 
             <Pressable style={[styles.button, styles.bgGreen]} onPress={register}>                                   
                 <Text style={styles.buttonText}>Cadastre-se</Text>

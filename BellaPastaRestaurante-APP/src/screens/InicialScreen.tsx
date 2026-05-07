@@ -15,8 +15,11 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../app/(tabs)/index";
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
+
 import { database } from "../services/connectionFirebase";
 import { ref, onValue } from "firebase/database";
+
+import CardProduto from "../../components/CardProduto";
 
 const { width, height } = Dimensions.get("window");
 
@@ -28,6 +31,7 @@ interface Produto {
   descricao: string;
   preco: number;
   categoria: string;
+  imagem?: string;
 }
 
 export default function TelaInicial() {
@@ -37,6 +41,7 @@ export default function TelaInicial() {
 
   useEffect(() => {
     const produtosRef = ref(database, "produtos");
+    
     const unsubscribe = onValue(produtosRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -46,6 +51,7 @@ export default function TelaInicial() {
           descricao: value.descricao,
           preco: value.preco,
           categoria: value.categoria,
+          imagem: value.imagem, 
         }));
         setProdutos(produtosList);
       } else {
@@ -61,57 +67,25 @@ export default function TelaInicial() {
     return () => unsubscribe();
   }, []);
 
-  const handlePedir = (produto: Produto) => {
-    Alert.alert("Pedido", `${produto.nome} - R$ ${produto.preco.toFixed(2)}`, [
-      { text: "OK", onPress: () => console.log("Pedido feito") },
-    ]);
-  };
-
-  const handleDetalhes = (produto: Produto) => {
-    Alert.alert("Detalhes", `${produto.nome}\n\n${produto.descricao}\n\nPreço: R$ ${produto.preco.toFixed(2)}`);
-  };
-
-  const getCardColor = (index: number) => {
-    return index % 2 === 0 ? "#00B14F" : "#FF3131";
-  };
-
-  const renderProduto = ({ item, index }: { item: Produto; index: number }) => {
-    const cardColor = getCardColor(index);
-    
-    return (
-      <View style={[styles.card, { backgroundColor: cardColor }]}>
-        <Text style={styles.produtoNome}>{item.nome}</Text>
-        <Text style={styles.produtoDescricao}>{item.descricao}</Text>
-        
-        <View style={styles.cardButtons}>
-          <TouchableOpacity 
-            style={[styles.button, styles.buttonPedir]}
-            onPress={() => handlePedir(item)}
-          >
-            <Text style={[styles.buttonText, { color: cardColor }]}>Pedir</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.button, styles.buttonDetalhes]}
-            onPress={() => handleDetalhes(item)}
-          >
-            <Text style={[styles.buttonText, { color: cardColor }]}>Detalhes</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
-
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#00B14F" />
       
-      {/* Cabeçalho Verde */}
+     
       <View style={styles.header}>
         <Text style={styles.headerText}>Bella Pasta</Text>
       </View>
 
-      {/* Lista de Produtos */}
+     
+      <View style={styles.fabContainer}>
+        <TouchableOpacity 
+          style={styles.fabButton}
+          onPress={() => navigation.navigate("CadastroProduto")}
+        >
+          <Entypo name="circle-with-plus" size={32} color="#fff" />
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.listaWrapper}>
         {loading ? (
           <View style={styles.loadingContainer}>
@@ -121,45 +95,44 @@ export default function TelaInicial() {
           <FlatList
             data={produtos}
             keyExtractor={(item) => item.id}
-            renderItem={renderProduto}
+            renderItem={({ item, index }) => (
+              <CardProduto item={item} index={index} />
+            )}
             contentContainerStyle={styles.listaContainer}
-            showsVerticalScrollIndicator={true}
+            showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>Nenhum produto cadastrado</Text>
-                <Text style={styles.emptySubText}>
-                  Acesse o perfil de admin para cadastrar
-                </Text>
               </View>
             }
           />
         )}
       </View>
 
-      {/* Menu Inferior Vermelho - FIXO */}
+      
       <View style={styles.faixaMenu}>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("InicialScreen")}>
           <Entypo name="home" size={24} color="white" />
           <Text style={styles.menuText}>Menu</Text>
         </TouchableOpacity>
-
+        
         <TouchableOpacity style={styles.menuItem}>
           <Entypo name="magnifying-glass" size={24} color="white" />
           <Text style={styles.menuText}>Pesquisar</Text>
         </TouchableOpacity>
-
+        
         <TouchableOpacity style={styles.menuItem}>
           <Entypo name="shopping-cart" size={24} color="white" />
           <Text style={styles.menuText}>Pedidos</Text>
         </TouchableOpacity>
-
+        
         <TouchableOpacity style={styles.menuItem}>
           <Entypo name="ticket" size={24} color="white" />
           <Text style={styles.menuText}>Reserva</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.menuItem}
+        
+        <TouchableOpacity 
+          style={styles.menuItem} 
           onPress={() => navigation.navigate("PerfilScreen")}
         >
           <Ionicons name="person" size={24} color="white" />
@@ -177,7 +150,7 @@ const styles = StyleSheet.create({
   },
   header: {
     width: "100%",
-    height: height * 0.25,
+    height: height * 0.15,
     backgroundColor: "#00B14F",
     justifyContent: "center",
     alignItems: "center",
@@ -186,82 +159,52 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 24,
     fontWeight: "bold",
+    letterSpacing: 1,
+  },
+  fabContainer: {
+    position: "absolute",
+    top: height * 0.8, 
+    right: 20,
+    zIndex: 10,
+  },
+  fabButton: {
+    backgroundColor: "#00B14F",
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 5,
   },
   listaWrapper: {
     flex: 1,
-    backgroundColor: "#fff",
+    marginTop: 20,
+  },
+  listaContainer: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  listaContainer: {
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    paddingBottom: 8,
-  },
-  card: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  produtoNome: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 8,
-  },
-  produtoDescricao: {
-    fontSize: 14,
-    color: "#fff",
-    lineHeight: 20,
-    marginBottom: 16,
-    opacity: 0.95,
-  },
-  cardButtons: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  button: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  buttonPedir: {
-    marginRight: 6,
-  },
-  buttonDetalhes: {
-    marginLeft: 6,
-  },
-  buttonText: {
-    fontWeight: "bold",
-    fontSize: 14,
-  },
   emptyContainer: {
     alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 50,
+    marginTop: 50,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#555",
-  },
-  emptySubText: {
-    fontSize: 14,
-    color: "#888",
-    marginTop: 8,
-    textAlign: "center",
+    color: "#999",
+    fontSize: 16,
   },
   faixaMenu: {
+    position: "absolute",
+    bottom: 0,
     width: "100%",
     height: height * 0.085,
     backgroundColor: "#FF3131",
@@ -273,12 +216,13 @@ const styles = StyleSheet.create({
   menuItem: {
     alignItems: "center",
     justifyContent: "center",
-    flex: 1,
+    width: 50,
+    height: 50,
   },
   menuText: {
     color: "white",
     fontSize: 10,
     marginTop: 4,
     fontWeight: "500",
-  },
+  }
 });
