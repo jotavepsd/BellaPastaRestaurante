@@ -85,6 +85,14 @@ export default function TelaInicial() {
           <Entypo name="circle-with-plus" size={32} color="#fff" />
         </TouchableOpacity>
       </View>
+      <View style={styles.fabContainer2}>
+        <TouchableOpacity 
+          style={styles.fabButton}
+          onPress={() => navigation.navigate("GerenciarProduto")}
+        >
+          <Entypo name="cog" size={32} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.listaWrapper}>
         {loading ? (
@@ -121,7 +129,7 @@ export default function TelaInicial() {
           <Text style={styles.menuText}>Pesquisar</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("Carrinho")}>
           <Entypo name="shopping-cart" size={24} color="white" />
           <Text style={styles.menuText}>Pedidos</Text>
         </TouchableOpacity>
@@ -163,7 +171,13 @@ const styles = StyleSheet.create({
   },
   fabContainer: {
     position: "absolute",
-    top: height * 0.8, 
+    top: height * 0.79, 
+    right: 20,
+    zIndex: 10,
+  },
+  fabContainer2: {
+    position: "absolute",
+    top: height * 0.85, 
     right: 20,
     zIndex: 10,
   },

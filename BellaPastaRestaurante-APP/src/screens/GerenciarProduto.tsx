@@ -12,12 +12,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../app/(tabs)/index";
 import { database } from "../services/connectionFirebase";
 import { ref, onValue, update, remove } from "firebase/database";
+import * as ImagePicker from "expo-image-picker";
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 type NavProp = StackNavigationProp<RootStackParamList>;
@@ -28,6 +30,7 @@ interface Produto {
   descricao: string;
   preco: number;
   categoria: string;
+  imagem?: string; // Adicionando campo imagem
 }
 
 export default function GerenciarProdutosScreen() {
@@ -37,7 +40,6 @@ export default function GerenciarProdutosScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [editandoProduto, setEditandoProduto] = useState<Produto | null>(null);
   
-  // Modal de confirmação de exclusão
   const [modalExclusaoVisible, setModalExclusaoVisible] = useState(false);
   const [produtoParaExcluir, setProdutoParaExcluir] = useState<Produto | null>(null);
   
@@ -45,8 +47,10 @@ export default function GerenciarProdutosScreen() {
   const [descricao, setDescricao] = useState("");
   const [preco, setPreco] = useState("");
   const [categoria, setCategoria] = useState("");
+  const [imagem, setImagem] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
+  const [carregandoImagem, setCarregandoImagem] = useState(false);
 
   useEffect(() => {
     carregarProdutos();
@@ -67,6 +71,7 @@ export default function GerenciarProdutosScreen() {
           descricao: value.descricao || "",
           preco: value.preco || 0,
           categoria: value.categoria || "",
+          imagem: value.imagem || null, // Carregando imagem
         }));
         setProdutos(produtosList);
         console.log("Produtos carregados:", produtosList.length);
@@ -84,12 +89,62 @@ export default function GerenciarProdutosScreen() {
     return () => unsubscribe();
   };
 
+  // Função para selecionar imagem da galeria
+  const selecionarImagem = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (status !== "granted") {
+      Alert.alert("Permissão negada", "Precisamos de acesso à sua galeria para selecionar a imagem.");
+      return;
+    }
+
+    setCarregandoImagem(true);
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.7,
+    });
+
+    setCarregandoImagem(false);
+
+    if (!result.canceled) {
+      setImagem(result.assets[0].uri);
+    }
+  };
+
+  // Função para tirar foto
+  const tirarFoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    
+    if (status !== "granted") {
+      Alert.alert("Permissão negada", "Precisamos de acesso à sua câmera para tirar foto.");
+      return;
+    }
+
+    setCarregandoImagem(true);
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.7,
+    });
+
+    setCarregandoImagem(false);
+
+    if (!result.canceled) {
+      setImagem(result.assets[0].uri);
+    }
+  };
+
   const abrirModalEdicao = (produto: Produto) => {
     setEditandoProduto(produto);
     setNome(produto.nome);
     setDescricao(produto.descricao);
     setPreco(produto.preco.toString());
     setCategoria(produto.categoria);
+    setImagem(produto.imagem || null); // Carregando imagem existente
     setModalVisible(true);
   };
 
@@ -156,12 +211,21 @@ export default function GerenciarProdutosScreen() {
 
     try {
       const produtoRef = ref(database, `produtos/${editandoProduto?.id}`);
-      await update(produtoRef, {
+      
+      // Preparando dados para atualização
+      const dadosAtualizados: any = {
         nome: nome.trim(),
         descricao: descricao.trim(),
         preco: precoNumerico,
         categoria: categoria.trim(),
-      });
+      };
+      
+      // Só atualiza a imagem se ela foi modificada
+      if (imagem !== undefined) {
+        dadosAtualizados.imagem = imagem;
+      }
+      
+      await update(produtoRef, dadosAtualizados);
 
       Alert.alert("Sucesso", "Produto atualizado com sucesso!");
       setModalVisible(false);
@@ -180,17 +244,23 @@ export default function GerenciarProdutosScreen() {
     setDescricao("");
     setPreco("");
     setCategoria("");
+    setImagem(null);
   };
 
   const renderProduto = ({ item }: { item: Produto }) => (
     <View style={styles.card}>
       <View style={styles.cardContent}>
-        <Text style={styles.produtoNome}>{item.nome}</Text>
-        <Text style={styles.produtoDescricao} numberOfLines={2}>
-          {item.descricao}
-        </Text>
-        <Text style={styles.produtoPreco}>R$ {item.preco.toFixed(2)}</Text>
-        <Text style={styles.produtoCategoria}>{item.categoria}</Text>
+        {item.imagem && (
+          <Image source={{ uri: item.imagem }} style={styles.produtoImagem} />
+        )}
+        <View style={styles.produtoInfo}>
+          <Text style={styles.produtoNome}>{item.nome}</Text>
+          <Text style={styles.produtoDescricao} numberOfLines={2}>
+            {item.descricao}
+          </Text>
+          <Text style={styles.produtoPreco}>R$ {item.preco.toFixed(2)}</Text>
+          <Text style={styles.produtoCategoria}>{item.categoria}</Text>
+        </View>
       </View>
       
       <View style={styles.cardButtons}>
@@ -248,7 +318,7 @@ export default function GerenciarProdutosScreen() {
         />
       )}
 
-    
+      
       <Modal
         animationType="slide"
         transparent={true}
@@ -263,6 +333,42 @@ export default function GerenciarProdutosScreen() {
             <Text style={styles.modalTitle}>Editar Produto</Text>
             
             <ScrollView showsVerticalScrollIndicator={false}>
+             
+              <Text style={styles.label}>Imagem do produto</Text>
+              
+              <TouchableOpacity style={styles.imageContainer} onPress={selecionarImagem}>
+                {carregandoImagem ? (
+                  <ActivityIndicator size="large" color="#00B14F" />
+                ) : imagem ? (
+                  <Image source={{ uri: imagem }} style={styles.previewImage} />
+                ) : (
+                  <View style={styles.imagePlaceholder}>
+                    <Ionicons name="image-outline" size={50} color="#999" />
+                    <Text style={styles.imagePlaceholderText}>Selecionar imagem</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+
+              
+              <View style={styles.imageOptions}>
+                <TouchableOpacity style={styles.imageOptionBtn} onPress={selecionarImagem}>
+                  <Ionicons name="images-outline" size={20} color="#00B14F" />
+                  <Text style={styles.imageOptionText}>Galeria</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.imageOptionBtn} onPress={tirarFoto}>
+                  <Ionicons name="camera-outline" size={20} color="#00B14F" />
+                  <Text style={styles.imageOptionText}>Câmera</Text>
+                </TouchableOpacity>
+                
+                {imagem && (
+                  <TouchableOpacity style={styles.imageOptionBtn} onPress={() => setImagem(null)}>
+                    <Ionicons name="trash-outline" size={20} color="#FF3131" />
+                    <Text style={[styles.imageOptionText, { color: "#FF3131" }]}>Remover</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
               <Text style={styles.label}>Nome do produto *</Text>
               <TextInput
                 style={styles.input}
@@ -328,7 +434,7 @@ export default function GerenciarProdutosScreen() {
         </KeyboardAvoidingView>
       </Modal>
 
-   
+      
       <Modal
         animationType="fade"
         transparent={true}
@@ -422,6 +528,16 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     padding: 16,
+    flexDirection: "row",
+  },
+  produtoImagem: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  produtoInfo: {
+    flex: 1,
   },
   produtoNome: {
     fontSize: 18,
@@ -566,7 +682,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-
   modalExclusaoOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.6)",
@@ -633,5 +748,52 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+ 
+  imageContainer: {
+    width: "100%",
+    height: 200,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 12,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderStyle: "dashed",
+  },
+  previewImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  imagePlaceholder: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  imagePlaceholderText: {
+    marginTop: 8,
+    color: "#999",
+    fontSize: 14,
+  },
+  imageOptions: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 12,
+  },
+  imageOptionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: "#f0f0f0",
+  },
+  imageOptionText: {
+    fontSize: 14,
+    color: "#00B14F",
+    fontWeight: "500",
   },
 });

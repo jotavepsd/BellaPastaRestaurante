@@ -35,7 +35,7 @@ export default function CadastroProdutoScreen() {
   const [carregandoImagem, setCarregandoImagem] = useState(false);
   const [scrollY, setScrollY] = useState(0);
 
-  // Solicitar permissão e selecionar imagem
+
   const selecionarImagem = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
@@ -60,7 +60,7 @@ export default function CadastroProdutoScreen() {
     }
   };
 
-  // Tirar foto
+ 
   const tirarFoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     
@@ -149,7 +149,7 @@ export default function CadastroProdutoScreen() {
 
   const onHandlerStateChange = (event: any) => {
     if (event.nativeEvent.state === State.END) {
-      // Finalizou o arrasto
+     
     }
   };
 
@@ -178,7 +178,7 @@ export default function CadastroProdutoScreen() {
 
             <View style={styles.form}>
               
-              {/* Seção de Imagem */}
+              
               <Text style={styles.label}>Imagem do produto</Text>
               
               <TouchableOpacity style={styles.imageContainer} onPress={selecionarImagem}>
@@ -194,7 +194,7 @@ export default function CadastroProdutoScreen() {
                 )}
               </TouchableOpacity>
 
-              {/* Opções de imagem */}
+             
               <View style={styles.imageOptions}>
                 <TouchableOpacity style={styles.imageOptionBtn} onPress={selecionarImagem}>
                   <Ionicons name="images-outline" size={20} color="#00B14F" />
@@ -217,7 +217,7 @@ export default function CadastroProdutoScreen() {
               <Text style={styles.label}>Nome do produto *</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Ex: Spaghetti alla genovese"
+                placeholder="Ex: Carbonara, Genovese"
                 value={nome}
                 onChangeText={setNome}
                 placeholderTextColor="#999"
@@ -247,7 +247,7 @@ export default function CadastroProdutoScreen() {
               <Text style={styles.label}>Categoria *</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Ex: Massas, Pizzas, Bebidas"
+                placeholder="Ex: Massa Longa, Massa Curta, Sopa"
                 value={categoria}
                 onChangeText={setCategoria}
                 placeholderTextColor="#999"

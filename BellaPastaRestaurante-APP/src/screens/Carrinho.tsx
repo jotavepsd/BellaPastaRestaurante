@@ -1,10 +1,13 @@
+
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
 interface CardProps {
   item: {
+    id: string;
     nome: string;
     descricao: string;
     preco: number;
@@ -19,34 +22,51 @@ export default function CardProduto({ item, index }: CardProps) {
   const bgColor = isRed ? "#FF3131" : "#00B14F";
   const flexDirection = isRed ? 'row' : 'row-reverse';
 
-  const imageSource = item.imagem 
-    ? { uri: item.imagem } 
-    : require('../assets/logo_bella_pasta.png');
+
+
+  const adicionarAoCarrinho = async () => {
+    try {
+      const carrinhoSalvo = await AsyncStorage.getItem('@carrinho');
+      let carrinho = carrinhoSalvo ? JSON.parse(carrinhoSalvo) : [];
+      
+      const itemExistente = carrinho.find((i: any) => i.id === item.id);
+      
+      if (itemExistente) {
+        itemExistente.quantidade += 1;
+      } else {
+        carrinho.push({
+          id: item.id,
+          nome: item.nome,
+          preco: item.preco,
+          quantidade: 1,
+          imagem: item.imagem,
+          descricao: item.descricao,
+        });
+      }
+      
+      await AsyncStorage.setItem('@carrinho', JSON.stringify(carrinho));
+      Alert.alert('Sucesso', `${item.nome} adicionado ao carrinho!`);
+    } catch (error) {
+      Alert.alert('Erro', 'Falha ao adicionar ao carrinho.');
+    }
+  };
 
   return (
     <View style={styles.cardContainer}>
       <View style={[styles.card, { backgroundColor: bgColor, flexDirection }]}>
-        <Image 
-          source={imageSource} 
-          style={styles.imagem} 
-        />
-
         <View style={styles.cardContent}>
           <Text style={styles.titulo} numberOfLines={1}>{item.nome}</Text>
           <Text style={styles.descricao} numberOfLines={3}>{item.descricao}</Text>
-          
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.botao}>
+            <TouchableOpacity style={styles.botao} onPress={adicionarAoCarrinho}>
               <Text style={[styles.textoBotao, { color: bgColor }]}>Pedir</Text>
             </TouchableOpacity>
-            
             <TouchableOpacity style={styles.botao}>
               <Text style={[styles.textoBotao, { color: bgColor }]}>Detalhes</Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
-      
       <View style={styles.faixaInfo}>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Preço</Text>
