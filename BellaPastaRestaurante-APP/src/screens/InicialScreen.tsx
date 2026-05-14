@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
-  Alert,
   StatusBar,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
@@ -20,6 +19,7 @@ import { database } from "../services/connectionFirebase";
 import { ref, onValue } from "firebase/database";
 
 import CardProduto from "../../components/CardProduto";
+import CustomToast from "../../components/CustomToast";
 
 const { width, height } = Dimensions.get("window");
 
@@ -38,6 +38,9 @@ export default function TelaInicial() {
   const navigation = useNavigation<NavProp>();
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
 
   useEffect(() => {
     const produtosRef = ref(database, "produtos");
@@ -60,23 +63,38 @@ export default function TelaInicial() {
       setLoading(false);
     }, (error) => {
       console.error(error);
-      Alert.alert("Erro", "Falha ao carregar produtos");
+      showToast('Falha ao carregar produtos', 'error');
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setToastVisible(true);
+  };
+
+  const handleAdicionarProduto = (message: string, success: boolean) => {
+    showToast(message, success ? 'success' : 'error');
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#00B14F" />
       
-     
+      <CustomToast 
+        visible={toastVisible}
+        message={toastMessage}
+        type={toastType}
+        onHide={() => setToastVisible(false)}
+      />
+      
       <View style={styles.header}>
         <Text style={styles.headerText}>Bella Pasta</Text>
       </View>
 
-     
       <View style={styles.fabContainer}>
         <TouchableOpacity 
           style={styles.fabButton}
@@ -85,6 +103,7 @@ export default function TelaInicial() {
           <Entypo name="circle-with-plus" size={32} color="#fff" />
         </TouchableOpacity>
       </View>
+      
       <View style={styles.fabContainer2}>
         <TouchableOpacity 
           style={styles.fabButton}
@@ -104,7 +123,11 @@ export default function TelaInicial() {
             data={produtos}
             keyExtractor={(item) => item.id}
             renderItem={({ item, index }) => (
-              <CardProduto item={item} index={index} />
+              <CardProduto 
+                item={item} 
+                index={index} 
+                onAdicionar={handleAdicionarProduto}
+              />
             )}
             contentContainerStyle={styles.listaContainer}
             showsVerticalScrollIndicator={false}
@@ -117,7 +140,6 @@ export default function TelaInicial() {
         )}
       </View>
 
-      
       <View style={styles.faixaMenu}>
         <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("InicialScreen")}>
           <Entypo name="home" size={24} color="white" />
@@ -158,7 +180,7 @@ const styles = StyleSheet.create({
   },
   header: {
     width: "100%",
-    height: height * 0.15,
+    height: height * 0.2,
     backgroundColor: "#00B14F",
     justifyContent: "center",
     alignItems: "center",

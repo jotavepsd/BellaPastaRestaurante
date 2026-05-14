@@ -1,10 +1,20 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { 
+  View, 
+  Text, 
+  Image, 
+  StyleSheet, 
+  TouchableOpacity, 
+  Dimensions,
+  ActivityIndicator 
+} from 'react-native';
+import CarrinhoService from '../src/services/carrinhoService';
 
 const { width } = Dimensions.get('window');
 
 interface CardProps {
   item: {
+    id: string;
     nome: string;
     descricao: string;
     preco: number;
@@ -12,9 +22,11 @@ interface CardProps {
     imagem?: string | null;
   };
   index: number;
+  onAdicionar?: (message: string, success: boolean) => void;
 }
 
-export default function CardProduto({ item, index }: CardProps) {
+export default function CardProduto({ item, index, onAdicionar }: CardProps) {
+  const [loading, setLoading] = useState(false);
   const isRed = index % 2 === 0;
   const bgColor = isRed ? "#FF3131" : "#00B14F";
   const flexDirection = isRed ? 'row' : 'row-reverse';
@@ -22,6 +34,29 @@ export default function CardProduto({ item, index }: CardProps) {
   const imageSource = item.imagem 
     ? { uri: item.imagem } 
     : require('../assets/logo_bella_pasta.png');
+
+  const handleAdicionarAoCarrinho = async () => {
+    setLoading(true);
+    try {
+      const response = await CarrinhoService.adicionarProduto({
+        id: item.id,
+        nome: item.nome,
+        preco: item.preco,
+        descricao: item.descricao,
+        imagem: item.imagem,
+      });
+
+      if (onAdicionar) {
+        onAdicionar(response.message, response.success);
+      }
+    } catch (error) {
+      if (onAdicionar) {
+        onAdicionar('Erro ao adicionar produto', false);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.cardContainer}>
@@ -36,8 +71,16 @@ export default function CardProduto({ item, index }: CardProps) {
           <Text style={styles.descricao} numberOfLines={3}>{item.descricao}</Text>
           
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.botao}>
-              <Text style={[styles.textoBotao, { color: bgColor }]}>Pedir</Text>
+            <TouchableOpacity 
+              style={[styles.botao, loading && styles.botaoDisabled]} 
+              onPress={handleAdicionarAoCarrinho}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color={bgColor} />
+              ) : (
+                <Text style={[styles.textoBotao, { color: bgColor }]}>Pedir</Text>
+              )}
             </TouchableOpacity>
             
             <TouchableOpacity style={styles.botao}>
@@ -120,6 +163,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     minWidth: 85,
     alignItems: 'center',
+  },
+  botaoDisabled: {
+    opacity: 0.6,
   },
   textoBotao: {
     fontSize: 12,

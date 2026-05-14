@@ -18,6 +18,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../app/(tabs)/index";
 import { database } from "../services/connectionFirebase";
 import { ref, push } from "firebase/database";
+import { uploadImagem } from "../services/uploadImageService";
 import * as ImagePicker from "expo-image-picker";
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -34,7 +35,6 @@ export default function CadastroProdutoScreen() {
   const [loading, setLoading] = useState(false);
   const [carregandoImagem, setCarregandoImagem] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-
 
   const selecionarImagem = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -60,7 +60,6 @@ export default function CadastroProdutoScreen() {
     }
   };
 
- 
   const tirarFoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     
@@ -111,6 +110,13 @@ export default function CadastroProdutoScreen() {
     setLoading(true);
 
     try {
+      let imagemURL = "";
+      
+      if (imagem) {
+        const nomeArquivo = nome.trim().replace(/\s/g, "_");
+        imagemURL = await uploadImagem(imagem, nomeArquivo);
+      }
+
       const produtosRef = ref(database, "produtos");
       
       const produtoData = {
@@ -118,7 +124,7 @@ export default function CadastroProdutoScreen() {
         descricao: descricao.trim(),
         preco: precoNumerico,
         categoria: categoria.trim(),
-        imagem: imagem || "",
+        imagem: imagemURL,
         createdAt: new Date().toISOString(),
       };
 
@@ -177,8 +183,6 @@ export default function CadastroProdutoScreen() {
             </View>
 
             <View style={styles.form}>
-              
-              
               <Text style={styles.label}>Imagem do produto</Text>
               
               <TouchableOpacity style={styles.imageContainer} onPress={selecionarImagem}>
@@ -194,7 +198,6 @@ export default function CadastroProdutoScreen() {
                 )}
               </TouchableOpacity>
 
-             
               <View style={styles.imageOptions}>
                 <TouchableOpacity style={styles.imageOptionBtn} onPress={selecionarImagem}>
                   <Ionicons name="images-outline" size={20} color="#00B14F" />

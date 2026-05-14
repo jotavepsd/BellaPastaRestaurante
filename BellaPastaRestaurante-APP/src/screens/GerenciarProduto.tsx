@@ -19,6 +19,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../app/(tabs)/index";
 import { database } from "../services/connectionFirebase";
 import { ref, onValue, update, remove } from "firebase/database";
+import { uploadImagem, deletarImagem } from "../services/uploadImageService";
 import * as ImagePicker from "expo-image-picker";
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -30,7 +31,7 @@ interface Produto {
   descricao: string;
   preco: number;
   categoria: string;
-  imagem?: string; // Adicionando campo imagem
+  imagem?: string;
 }
 
 export default function GerenciarProdutosScreen() {
@@ -62,7 +63,6 @@ export default function GerenciarProdutosScreen() {
     
     const unsubscribe = onValue(produtosRef, (snapshot) => {
       const data = snapshot.val();
-      console.log("Dados carregados do Firebase:", data);
       
       if (data) {
         const produtosList = Object.entries(data).map(([id, value]: [string, any]) => ({
@@ -71,13 +71,11 @@ export default function GerenciarProdutosScreen() {
           descricao: value.descricao || "",
           preco: value.preco || 0,
           categoria: value.categoria || "",
-          imagem: value.imagem || null, // Carregando imagem
+          imagem: value.imagem || null,
         }));
         setProdutos(produtosList);
-        console.log("Produtos carregados:", produtosList.length);
       } else {
         setProdutos([]);
-        console.log("Nenhum produto encontrado");
       }
       setLoading(false);
     }, (error) => {
@@ -89,7 +87,6 @@ export default function GerenciarProdutosScreen() {
     return () => unsubscribe();
   };
 
-  // Função para selecionar imagem da galeria
   const selecionarImagem = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     
@@ -114,7 +111,6 @@ export default function GerenciarProdutosScreen() {
     }
   };
 
-  // Função para tirar foto
   const tirarFoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     
@@ -144,7 +140,7 @@ export default function GerenciarProdutosScreen() {
     setDescricao(produto.descricao);
     setPreco(produto.preco.toString());
     setCategoria(produto.categoria);
-    setImagem(produto.imagem || null); // Carregando imagem existente
+    setImagem(produto.imagem || null);
     setModalVisible(true);
   };
 
@@ -159,22 +155,16 @@ export default function GerenciarProdutosScreen() {
     setExcluindo(true);
     
     try {
-      console.log("Excluindo produto:", produtoParaExcluir.id, produtoParaExcluir.nome);
-      
-      if (!produtoParaExcluir.id) {
-        Alert.alert("Erro", "ID do produto não encontrado");
-        return;
+      if (produtoParaExcluir.imagem) {
+        await deletarImagem(produtoParaExcluir.imagem);
       }
       
       const produtoRef = ref(database, `produtos/${produtoParaExcluir.id}`);
       await remove(produtoRef);
       
-      console.log("Produto excluído com sucesso!");
       Alert.alert("Sucesso", "Produto excluído com sucesso!");
-      
       setModalExclusaoVisible(false);
       setProdutoParaExcluir(null);
-      
     } catch (error: any) {
       console.error("Erro detalhado ao excluir:", error);
       Alert.alert("Erro", "Falha ao excluir produto. Verifique sua conexão e permissões.");
@@ -210,20 +200,29 @@ export default function GerenciarProdutosScreen() {
     setSalvando(true);
 
     try {
+      let imagemURL = editandoProduto?.imagem || "";
+      
+      if (imagem && imagem !== editandoProduto?.imagem) {
+        if (editandoProduto?.imagem) {
+          await deletarImagem(editandoProduto.imagem);
+        }
+        
+        const nomeArquivo = nome.trim().replace(/\s/g, "_");
+        imagemURL = await uploadImagem(imagem, nomeArquivo);
+      } else if (imagem === null && editandoProduto?.imagem) {
+        await deletarImagem(editandoProduto.imagem);
+        imagemURL = "";
+      }
+
       const produtoRef = ref(database, `produtos/${editandoProduto?.id}`);
       
-      // Preparando dados para atualização
       const dadosAtualizados: any = {
         nome: nome.trim(),
         descricao: descricao.trim(),
         preco: precoNumerico,
         categoria: categoria.trim(),
+        imagem: imagemURL,
       };
-      
-      // Só atualiza a imagem se ela foi modificada
-      if (imagem !== undefined) {
-        dadosAtualizados.imagem = imagem;
-      }
       
       await update(produtoRef, dadosAtualizados);
 
@@ -318,7 +317,6 @@ export default function GerenciarProdutosScreen() {
         />
       )}
 
-      
       <Modal
         animationType="slide"
         transparent={true}
@@ -333,7 +331,6 @@ export default function GerenciarProdutosScreen() {
             <Text style={styles.modalTitle}>Editar Produto</Text>
             
             <ScrollView showsVerticalScrollIndicator={false}>
-             
               <Text style={styles.label}>Imagem do produto</Text>
               
               <TouchableOpacity style={styles.imageContainer} onPress={selecionarImagem}>
@@ -349,7 +346,6 @@ export default function GerenciarProdutosScreen() {
                 )}
               </TouchableOpacity>
 
-              
               <View style={styles.imageOptions}>
                 <TouchableOpacity style={styles.imageOptionBtn} onPress={selecionarImagem}>
                   <Ionicons name="images-outline" size={20} color="#00B14F" />
@@ -434,7 +430,6 @@ export default function GerenciarProdutosScreen() {
         </KeyboardAvoidingView>
       </Modal>
 
-      
       <Modal
         animationType="fade"
         transparent={true}
@@ -635,165 +630,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: "500",
-    color: "#333",
-    marginBottom: 6,
-    marginTop: 12,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontSize: 16,
-    backgroundColor: "#f9f9f9",
-  },
-  textArea: {
-    height: 80,
-    textAlignVertical: "top",
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 24,
-    marginBottom: 10,
-    gap: 12,
-  },
-  modalBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  salvarModalBtn: {
-    backgroundColor: "#00B14F",
-  },
-  cancelarModalBtn: {
-    backgroundColor: "#FF3131",
-  },
-  salvarModalText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  cancelarModalText: {
-    color: "#FFF",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  modalExclusaoOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalExclusaoContent: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 24,
-    width: "85%",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalExclusaoTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#FF3131",
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  modalExclusaoMessage: {
-    fontSize: 16,
-    color: "#333",
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  modalExclusaoSubMessage: {
-    fontSize: 14,
-    color: "#666",
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  modalExclusaoButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    gap: 12,
-  },
-  exclusaoBtn: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  cancelarExclusaoBtn: {
-    backgroundColor: "#f5f5f5",
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  confirmarExclusaoBtn: {
-    backgroundColor: "#FF3131",
-  },
-  cancelarExclusaoText: {
-    color: "#666",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  confirmarExclusaoText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
- 
-  imageContainer: {
-    width: "100%",
-    height: 200,
-    backgroundColor: "#f5f5f5",
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderStyle: "dashed",
-  },
-  previewImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-  imagePlaceholder: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  imagePlaceholderText: {
-    marginTop: 8,
-    color: "#999",
-    fontSize: 14,
-  },
-  imageOptions: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 12,
-  },
-  imageOptionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: "#f0f0f0",
-  },
-  imageOptionText: {
-    fontSize: 14,
-    color: "#00B14F",
-    fontWeight: "500",
-  },
-});
+    fontWeight: "500"
+  }
+})
