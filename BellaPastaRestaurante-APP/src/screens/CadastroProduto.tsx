@@ -1,26 +1,26 @@
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
-  ActivityIndicator,
-} from "react-native";
-import { GestureHandlerRootView, PanGestureHandler, State } from "react-native-gesture-handler";
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import * as ImagePicker from "expo-image-picker";
+import { push, ref } from "firebase/database";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { GestureHandlerRootView, PanGestureHandler, State } from "react-native-gesture-handler";
 import { RootStackParamList } from "../../app/(tabs)/index";
 import { database } from "../services/connectionFirebase";
-import { ref, push } from "firebase/database";
 import { uploadImagem } from "../services/uploadImageService";
-import * as ImagePicker from "expo-image-picker";
-import Ionicons from '@expo/vector-icons/Ionicons';
 
 type NavProp = StackNavigationProp<RootStackParamList>;
 
@@ -228,7 +228,7 @@ export default function CadastroProdutoScreen() {
 
               <Text style={styles.label}>Descrição *</Text>
               <TextInput
-                style={[styles.input, styles.textArea]}
+                style={styles.input}
                 placeholder="Ex: Leve e aromático, com o frescor do pesto..."
                 value={descricao}
                 onChangeText={setDescricao}

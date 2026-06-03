@@ -1,7 +1,7 @@
 [
   {
     "origin": ["http://localhost:8081", "http://localhost:19000", "http://localhost:19001", "http://localhost:19006"],
-    "method": ["GET", "POST", "PUT", "DELETE", "HEAD"],
+    "method": ["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"],
     "maxAgeSeconds": 3600,
     "responseHeader": ["Content-Type", "Authorization", "Content-Length", "User-Agent", "x-firebase-storage-version"]
   }

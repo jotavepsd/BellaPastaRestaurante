@@ -226,7 +226,7 @@ export default function GerenciarProdutosScreen() {
       
       await update(produtoRef, dadosAtualizados);
 
-      Alert.alert("Sucesso", "Produto atualizado com sucesso!");
+      Alert.alert("Sucesso", "Produto updated com sucesso!");
       setModalVisible(false);
       setEditandoProduto(null);
       limparFormulario();
@@ -608,7 +608,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  // Modal de Edição
   modalContainer: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -709,23 +708,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginHorizontal: 8,
   },
-  salvarModalBtn: {
-    backgroundColor: "#00B14F",
-  },
-  salvarModalText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
   cancelarModalBtn: {
     backgroundColor: "#FF3131",
   },
   cancelarModalText: {
     color: "#fff",
-    fontSize: 16,
     fontWeight: "bold",
+    fontSize: 16,
   },
-  // Modal de Exclusão
+  salvarModalBtn: {
+    backgroundColor: "#00B14F",
+  },
+  salvarModalText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
   modalExclusaoOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -736,7 +734,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 20,
     padding: 24,
-    width: "80%",
+    width: "85%",
     alignItems: "center",
   },
   modalExclusaoTitle: {
@@ -750,40 +748,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 4,
   },
   modalExclusaoSubMessage: {
     fontSize: 14,
     color: "#666",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 24,
   },
   modalExclusaoButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    gap: 12,
   },
   exclusaoBtn: {
     flex: 1,
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
+    marginHorizontal: 8,
+  },
+  cancelarExclusaoBtn: {
+    backgroundColor: "#f5f5f5",
+  },
+  cancelarExclusaoText: {
+    color: "#333",
+    fontWeight: "600",
+    fontSize: 16,
   },
   confirmarExclusaoBtn: {
     backgroundColor: "#FF3131",
   },
   confirmarExclusaoText: {
     color: "#fff",
-    fontSize: 16,
     fontWeight: "bold",
-  },
-  cancelarExclusaoBtn: {
-    backgroundColor: "#ccc",
-  },
-  cancelarExclusaoText: {
-    color: "#000",
     fontSize: 16,
-    fontWeight: "bold",
   },
 });

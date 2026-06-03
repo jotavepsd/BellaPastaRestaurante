@@ -3,17 +3,15 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { Dimensions, Image, StyleSheet, Text, View, Pressable } from "react-native";
 import { RootStackParamList } from "../../app/(tabs)/index";
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 type NavProp = StackNavigationProp<RootStackParamList>
 
 export default function Index() {
-
     const navigation = useNavigation<NavProp>();
 
     return (
         <View style={styles.container}>
-            
             <View style={styles.faixaVerde} />
             <View style={styles.faixaVermelha} />
 
@@ -21,14 +19,11 @@ export default function Index() {
                 <Text style={styles.principal}>Seja bem-vindo ao</Text>
 
                 <Image 
-                    
                     source={require('../../assets/logo_bella_pasta.png')} 
                     style={styles.logo}
                     resizeMode="contain"
                 />
-               
 
-                
                 <View style={styles.buttonContainer}>
                     <Pressable style={[styles.button, styles.bgGreen]} onPress={() => navigation.navigate("LoginUser")}>
                         <Text style={styles.buttonText}>Login</Text>
@@ -36,9 +31,7 @@ export default function Index() {
 
                     <Text style={styles.ou}>ou</Text>
 
-                    <Pressable style={[styles.button, styles.bgRed]} 
-                    onPress={() => navigation.navigate("RegisterUser")}>
-                        
+                    <Pressable style={[styles.button, styles.bgRed]} onPress={() => navigation.navigate("RegisterUser")}>
                         <Text style={styles.buttonText}>Cadastre-se</Text>
                     </Pressable>
                 </View>
@@ -53,44 +46,49 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
     },
-content: {
-    flex: 1, 
-    alignItems: 'center',
-    justifyContent: 'center', 
-    width: '100%',
-    paddingHorizontal: 20,
-},
+    content: {
+        flex: 1, 
+        alignItems: 'center',
+        justifyContent: 'center', 
+        width: '100%',
+        paddingHorizontal: 30,
+        maxWidth: 500,
+        alignSelf: 'center',
+        zIndex: 2,
+    },
     principal: {
         fontSize: 32,
         fontWeight: 'bold',
         color: '#000',
-        marginBottom: 40,
+        marginBottom: 30,
+        textAlign: 'center',
     },
     logo: {
-        width: width * 0.7,
-        height: width * 0.7,
+        width: width * 0.6,
+        height: width * 0.6,
+        maxHeight: 250,
+        maxWidth: 250,
         marginBottom: 40,
     },
     buttonContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         width: '100%',
+        marginTop: 10,
     },
     button: {
         flex: 1,
-        height: 45,
-        borderRadius: 5,
+        height: 48,
+        borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
     },
     buttonText: {
         color: '#fff',
         fontWeight: 'bold',
-        fontSize: 18,
+        fontSize: 16,
     },
     bgGreen: {
         backgroundColor: '#00B14F',
@@ -101,23 +99,24 @@ content: {
     ou: {
         marginHorizontal: 15,
         fontSize: 16,
-    },
-    footerText: {
-        marginTop: 60,
-        fontSize: 14,
         color: '#333',
     },
-
+    footerText: {
+        marginTop: 50,
+        fontSize: 14,
+        color: '#777',
+    },
     faixaVerde: {
         position: 'absolute',
         top: 0,
         left: 0,
         width: 0,
         height: 0,
-        borderRightWidth: width * 0.4,
-        borderTopWidth: height * 0.2,
+        borderRightWidth: 150,
+        borderTopWidth: 150,
         borderRightColor: 'transparent',
         borderTopColor: '#00B14F',
+        zIndex: 1,
     },
     faixaVermelha: {
         position: 'absolute',
@@ -125,9 +124,10 @@ content: {
         right: 0,
         width: 0,
         height: 0,
-        borderLeftWidth: width * 0.4,
-        borderBottomWidth: height * 0.2,
+        borderLeftWidth: 150,
+        borderBottomWidth: 150,
         borderLeftColor: 'transparent',
         borderBottomColor: '#FF3131',
+        zIndex: 1,
     }
 });
