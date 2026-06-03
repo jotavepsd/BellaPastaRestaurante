@@ -608,6 +608,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
+  // Modal de Edição
   modalContainer: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -630,6 +631,159 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: "500"
-  }
-})
+    fontWeight: "500",
+    color: "#333",
+    marginBottom: 8,
+    marginTop: 12,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    fontSize: 16,
+    backgroundColor: "#f9f9f9",
+    color: "#000",
+  },
+  textArea: {
+    height: 80,
+    textAlignVertical: "top",
+  },
+  imageContainer: {
+    width: "100%",
+    height: 150,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 12,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderStyle: "dashed",
+  },
+  previewImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  imagePlaceholder: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  imagePlaceholderText: {
+    marginTop: 8,
+    color: "#999",
+    fontSize: 14,
+  },
+  imageOptions: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 12,
+  },
+  imageOptionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: "#f0f0f0",
+  },
+  imageOptionText: {
+    fontSize: 14,
+    color: "#00B14F",
+    fontWeight: "500",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  modalBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginHorizontal: 8,
+  },
+  salvarModalBtn: {
+    backgroundColor: "#00B14F",
+  },
+  salvarModalText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  cancelarModalBtn: {
+    backgroundColor: "#FF3131",
+  },
+  cancelarModalText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  // Modal de Exclusão
+  modalExclusaoOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalExclusaoContent: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 24,
+    width: "80%",
+    alignItems: "center",
+  },
+  modalExclusaoTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#000",
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  modalExclusaoMessage: {
+    fontSize: 16,
+    color: "#333",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  modalExclusaoSubMessage: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  modalExclusaoButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    gap: 12,
+  },
+  exclusaoBtn: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  confirmarExclusaoBtn: {
+    backgroundColor: "#FF3131",
+  },
+  confirmarExclusaoText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  cancelarExclusaoBtn: {
+    backgroundColor: "#ccc",
+  },
+  cancelarExclusaoText: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});

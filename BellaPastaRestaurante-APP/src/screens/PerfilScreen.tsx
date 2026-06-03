@@ -16,6 +16,22 @@ const { width, height } = Dimensions.get("window");
 
 type NavProp = StackNavigationProp<RootStackParamList>;
 
+function applyPhoneMask(value: string): string {
+  let numbers = value.replace(/\D/g, '');
+  if (numbers.length <= 2) {
+    return numbers.replace(/(\d{0,2})/, '($1');
+  } else if (numbers.length <= 7) {
+    return numbers.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+  } else {
+    return numbers.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+  }
+}
+
+function formatPhoneDisplay(phone: string): string {
+  if (!phone) return "Sem telefone";
+  return applyPhoneMask(phone);
+}
+
 export default function PerfilScreen() {
   const navigation = useNavigation<NavProp>();
 
@@ -55,17 +71,33 @@ export default function PerfilScreen() {
     setModalVisible(true);
   };
 
+  const handlePhoneChange = (text: string) => {
+    const maskedText = applyPhoneMask(text);
+    setNovoTelefone(maskedText);
+  };
+
+  const getRawPhoneNumber = (phone: string): string => {
+    return phone.replace(/\D/g, '');
+  };
+
   const handleUpdate = async () => {
     const user = auth.currentUser;
     if (user) {
+      const rawPhone = getRawPhoneNumber(novoTelefone);
+      
+      if (rawPhone.length < 11) {
+        Alert.alert("Erro", "Telefone inválido");
+        return;
+      }
+
       const userRef = ref(database, "users " + user.uid);
       try {
         await update(userRef, {
           name: novoNome,
-          cellphone: novoTelefone,
+          cellphone: rawPhone,
         });
         setNome(novoNome);
-        setTelefone(novoTelefone);
+        setTelefone(rawPhone);
         setModalVisible(false);
         Alert.alert("Sucesso", "Dados atualizados!");
       } catch (error) {
@@ -73,6 +105,8 @@ export default function PerfilScreen() {
       }
     }
   };
+
+  const formattedPhone = formatPhoneDisplay(telefone);
 
   return (
     <View style={styles.container}>
@@ -84,18 +118,10 @@ export default function PerfilScreen() {
         ) : (
           <View style={{ alignItems: 'center' }}>
             <Text style={styles.userName}>Olá, {nome || "Usuário"}</Text>
-            <Text style={styles.userPhone}>{telefone || "Sem telefone"}</Text>
+            <Text style={styles.userPhone}>{formattedPhone}</Text>
             
             <TouchableOpacity onPress={abrirModal} style={styles.editButton}>
               <Text style={styles.editButtonText}>Editar Perfil</Text>
-            </TouchableOpacity>
-
-           
-            <TouchableOpacity 
-              onPress={() => navigation.navigate("CadastroProduto")} 
-              style={styles.cadastroButton}
-            >
-              <Text style={styles.cadastroButtonText}>+ Cadastrar Produto</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -134,7 +160,8 @@ export default function PerfilScreen() {
               placeholder="Telefone"
               value={novoTelefone}
               keyboardType="phone-pad"
-              onChangeText={setNovoTelefone}
+              onChangeText={handlePhoneChange}
+              maxLength={15}
             />
 
             <View style={styles.buttonContainer}>

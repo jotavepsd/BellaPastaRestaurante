@@ -7,13 +7,20 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { ref, set} from "firebase/database";
 import { auth, database } from "../services/connectionFirebase";
 
-
-
 const {width, height} = Dimensions.get("window");
-
 
 type NavProp = StackNavigationProp<RootStackParamList>
 
+function applyPhoneMask(value: string): string {
+  let numbers = value.replace(/\D/g, '');
+  if (numbers.length <= 2) {
+    return numbers.replace(/(\d{0,2})/, '($1');
+  } else if (numbers.length <= 7) {
+    return numbers.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+  } else {
+    return numbers.replace(/(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+  }
+}
 
 export default function RegisterUser(){
 
@@ -28,7 +35,16 @@ export default function RegisterUser(){
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
 
-     function validateFields(): boolean {
+    const handlePhoneChange = (text: string) => {
+      const maskedText = applyPhoneMask(text);
+      setCellphone(maskedText);
+    };
+
+    const getRawPhoneNumber = (phone: string): string => {
+      return phone.replace(/\D/g, '');
+    };
+
+    function validateFields(): boolean {
 
     if (!name || !email || !cellphone || !password) {
       showAlert("Preencha todos os campos obrigatórios");
@@ -47,7 +63,8 @@ export default function RegisterUser(){
       return false;
     }
 
-    if (cellphone.length < 11) {
+    const rawPhone = getRawPhoneNumber(cellphone);
+    if (rawPhone.length < 11) {
       showAlert("Telefone inválido");
       return false;
     }
@@ -63,7 +80,6 @@ export default function RegisterUser(){
     }
   }
 
-
   async function register(): Promise<void> {
 
     if (!validateFields()) return;
@@ -78,10 +94,11 @@ export default function RegisterUser(){
       const user = userCredential.user;
 
       if (user) {
+        const rawPhone = getRawPhoneNumber(cellphone);
         await set(ref(database, "users " + user.uid), {
           uid: user.uid,
           name,
-          cellphone,
+          cellphone: rawPhone,
           email,
           createdAt: new Date().toISOString(),
         });
@@ -122,7 +139,9 @@ export default function RegisterUser(){
 
             <TextInput placeholder="Telefone" style={styles.input}
             value={cellphone}
-            onChangeText={setCellphone}/>
+            onChangeText={handlePhoneChange}
+            keyboardType="phone-pad"
+            maxLength={15}/>
 
             <TextInput placeholder="Email" style={styles.input}
             value={email}
