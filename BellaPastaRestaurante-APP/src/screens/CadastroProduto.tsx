@@ -2,7 +2,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import * as ImagePicker from "expo-image-picker";
-import { push, ref } from "firebase/database";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -17,9 +16,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { productService } from "../services/products_service";
 import { GestureHandlerRootView, PanGestureHandler, State } from "react-native-gesture-handler";
 import { RootStackParamList } from "../../app/(tabs)/index";
-import { database } from "../services/connectionFirebase";
 import { uploadImagem } from "../services/uploadImageService";
 
 type NavProp = StackNavigationProp<RootStackParamList>;
@@ -117,18 +116,16 @@ export default function CadastroProdutoScreen() {
         imagemURL = await uploadImagem(imagem, nomeArquivo);
       }
 
-      const produtosRef = ref(database, "produtos");
-      
       const produtoData = {
-        nome: nome.trim(),
-        descricao: descricao.trim(),
-        preco: precoNumerico,
-        categoria: categoria.trim(),
-        imagem: imagemURL,
-        createdAt: new Date().toISOString(),
-      };
+  nome: nome.trim(),
+  descricao: descricao.trim(),
+  preco: precoNumerico,
+  categoria: categoria.trim(),
+  imagemUrl: imagemURL,
+  createdAt: new Date().toISOString(),
+};
 
-      await push(produtosRef, produtoData);
+await productService.create(produtoData as any);
 
       Alert.alert("Sucesso", "Produto cadastrado com sucesso!", [
         { text: "OK", onPress: () => navigation.goBack() }

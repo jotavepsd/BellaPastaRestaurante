@@ -1,35 +1,50 @@
-import { database } from '../services/connectionFirebase';
-import { ref, push, get, update, remove } from 'firebase/database';
-import { Product } from '../models/products';
-
-const PATH = 'products';
+import { Product } from "../models/products";
+import {
+  getProdutos,
+  saveProdutos,
+} from "../services/jsonbinService";
 
 export const productService = {
   async create(product: Product) {
-    const productRef = ref(database, PATH);
-    await push(productRef, product);
+    const products = await getProdutos();
+
+    const newProduct: Product = {
+      ...product,
+      id: Date.now().toString(),
+    };
+
+    products.push(newProduct);
+
+    await saveProdutos(products);
   },
 
   async getAll(): Promise<Product[]> {
-    const snapshot = await get(ref(database, PATH));
-    const data = snapshot.val();
-
-    const products: Product[] = [];
-
-    for (let id in data) {
-      products.push({ id, ...data[id] });
-    }
-
-    return products;
+    return await getProdutos();
   },
 
   async update(id: string, product: Product) {
-    const productRef = ref(database, `${PATH}/${id}`);
-    await update(productRef, product);
+    const products = await getProdutos();
+
+    const updatedProducts = products.map((p: Product) =>
+      p.id === id
+        ? {
+            ...p,
+            ...product,
+            id,
+          }
+        : p
+    );
+
+    await saveProdutos(updatedProducts);
   },
 
   async delete(id: string) {
-    const productRef = ref(database, `${PATH}/${id}`);
-    await remove(productRef);
-  }
+    const products = await getProdutos();
+
+    const filteredProducts = products.filter(
+      (p: Product) => p.id !== id
+    );
+
+    await saveProdutos(filteredProducts);
+  },
 };

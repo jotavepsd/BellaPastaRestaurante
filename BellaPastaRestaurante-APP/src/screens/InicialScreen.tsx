@@ -1,4 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
+import {
+  useNavigation,
+  useFocusEffect,
+} from "@react-navigation/native";
 import {
   StyleSheet,
   Text,
@@ -9,17 +13,17 @@ import {
   ActivityIndicator,
   StatusBar,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../app/(tabs)/index";
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-import { database } from "../services/connectionFirebase";
-import { ref, onValue } from "firebase/database";
-
 import CardProduto from "../../components/CardProduto";
 import CustomToast from "../../components/CustomToast";
+
+import { getProdutos } from "../services/jsonbinService";
+
+
 
 const { width, height } = Dimensions.get("window");
 
@@ -31,7 +35,7 @@ interface Produto {
   descricao: string;
   preco: number;
   categoria: string;
-  imagem?: string;
+  imagemUrl?: string;
 }
 
 export default function TelaInicial() {
@@ -42,33 +46,38 @@ export default function TelaInicial() {
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
 
-  useEffect(() => {
-    const produtosRef = ref(database, "produtos");
-    
-    const unsubscribe = onValue(produtosRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const produtosList = Object.entries(data).map(([id, value]: [string, any]) => ({
-          id,
-          nome: value.nome,
-          descricao: value.descricao,
-          preco: value.preco,
-          categoria: value.categoria,
-          imagem: value.imagem, 
-        }));
-        setProdutos(produtosList);
-      } else {
-        setProdutos([]);
-      }
-      setLoading(false);
-    }, (error) => {
-      console.error(error);
-      showToast('Falha ao carregar produtos', 'error');
-      setLoading(false);
-    });
+useFocusEffect(
+  useCallback(() => {
+    async function carregarProdutos() {
+      try {
+        setLoading(true);
 
-    return () => unsubscribe();
-  }, []);
+        const produtosJson = await getProdutos();
+
+        console.log(
+          "Produtos carregados:",
+          produtosJson
+        );
+
+        setProdutos(produtosJson);
+      } catch (error) {
+        console.log(
+          "Erro ao carregar produtos:",
+          error
+        );
+
+        showToast(
+          "Erro ao carregar produtos",
+          "error"
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    carregarProdutos();
+  }, [])
+);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToastMessage(message);

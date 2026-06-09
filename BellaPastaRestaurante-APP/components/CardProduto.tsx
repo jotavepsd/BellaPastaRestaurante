@@ -19,7 +19,7 @@ interface CardProps {
     descricao: string;
     preco: number;
     categoria: string;
-    imagem?: string | null;
+    imagemUrl?: string | null;
   };
   index: number;
   onAdicionar?: (message: string, success: boolean) => void;
@@ -31,9 +31,9 @@ export default function CardProduto({ item, index, onAdicionar }: CardProps) {
   const bgColor = isRed ? "#FF3131" : "#00B14F";
   const flexDirection = isRed ? 'row' : 'row-reverse';
 
-  const imageSource = item.imagem 
-    ? { uri: item.imagem } 
-    : require('../assets/logo_bella_pasta.png');
+  const imageSource = item.imagemUrl
+  ? { uri: item.imagemUrl }
+  : require('../assets/logo_bella_pasta.png');
 
   const handleAdicionarAoCarrinho = async () => {
     setLoading(true);
@@ -43,7 +43,7 @@ export default function CardProduto({ item, index, onAdicionar }: CardProps) {
         nome: item.nome,
         preco: item.preco,
         descricao: item.descricao,
-        imagem: item.imagem,
+        imagem: item.imagemUrl,
       });
 
       if (onAdicionar) {

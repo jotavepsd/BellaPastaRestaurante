@@ -17,6 +17,10 @@ import { RootStackParamList } from '../../app/(tabs)/index';
 import CarrinhoService, { CarrinhoItem } from '../services/carrinhoService';
 import CustomToast from '../../components/CustomToast';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+import { pedidoService } from "../services/pedidoService";
+import { notificacaoService } from '../services/notificacaoService';
 
 const { height, width } = Dimensions.get('window');
 
@@ -27,24 +31,26 @@ export default function CarrinhoScreen() {
   const [itens, setItens] = useState<CarrinhoItem[]>([]);
   const [total, setTotal] = useState(0);
   
-  // Estados do Toast
+
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
 
-  // Estados dos Modais
+
   const [modalRemoverVisible, setModalRemoverVisible] = useState(false);
   const [modalLimparVisible, setModalLimparVisible] = useState(false);
   const [modalFinalizarVisible, setModalFinalizarVisible] = useState(false);
 
-  // Dados auxiliares para os modais
+ 
   const [itemParaExcluir, setItemParaExcluir] = useState<{ id: string; nome: string } | null>(null);
   const [cupom, setCupom] = useState('');
   const [desconto, setDesconto] = useState(0);
 
-  useEffect(() => {
+ useFocusEffect(
+  useCallback(() => {
     carregarCarrinho();
-  }, []);
+  }, [])
+);
 
   const carregarCarrinho = async () => {
     try {
@@ -63,14 +69,14 @@ export default function CarrinhoScreen() {
     setToastVisible(true);
   };
 
-  // 1. Lógica de controle de quantidade (-1)
+  
   const handleRemoverUnidade = async (id: string, nome: string) => {
     const response = await CarrinhoService.removerProduto(id, nome);
     showToast(response.message, response.success ? 'success' : 'error');
     await carregarCarrinho();
   };
 
-  // 2. Lógica de exclusão completa de 1 item
+ 
   const handleAbrirConfirmacaoItem = (id: string, nome: string) => {
     setItemParaExcluir({ id, nome });
     setModalRemoverVisible(true);
@@ -87,7 +93,7 @@ export default function CarrinhoScreen() {
     setItemParaExcluir(null);
   };
 
-  // 3. Lógica de esvaziar carrinho
+
   const confirmarLimparCarrinho = async () => {
     setModalLimparVisible(false);
     const response = await CarrinhoService.limparCarrinho();
@@ -95,14 +101,14 @@ export default function CarrinhoScreen() {
     await carregarCarrinho();
   };
 
-  // 4. Lógica do Cupom de Desconto (Simulação de aplicação)
+  
   const aplicarCupom = () => {
     const cupomTexto = cupom.trim().toUpperCase();
     if (cupomTexto === 'DESCONTO10') {
-      setDesconto(total * 0.10); // 10% de desconto
+      setDesconto(total * 0.10); 
       showToast("Cupom de 10% aplicado!", "success");
     } else if (cupomTexto === 'BELLAPASTA') {
-      setDesconto(total * 0.15); // 15% de desconto
+      setDesconto(total * 0.15); 
       showToast("Cupom de 15% aplicado!", "success");
     } else if (cupomTexto === '') {
       showToast("Digite um cupom válido", "info");
@@ -112,13 +118,40 @@ export default function CarrinhoScreen() {
     }
   };
 
-  // 5. Envio final do pedido
-  const handleEnviarPedidoFinal = () => {
+const handleEnviarPedidoFinal = async () => {
+  try {
+    await pedidoService.create(
+      itens,
+      total,
+      desconto
+    );
+
+    await CarrinhoService.limparCarrinho();
+
+    await carregarCarrinho();
+
+    await notificacaoService.create({
+  pedidoId: "geral",
+  mensagem: "Seu pedido foi confirmado!",
+  status: "confirmado",
+  data: new Date().toISOString(),
+});
+
     setModalFinalizarVisible(false);
-    // Aqui você integra com sua API / Firebase enviando o subtotal e desconto
-    showToast("Pedido finalizado e enviado com sucesso!", "success");
-    // Opcional: CarrinhoService.limparCarrinho() após fechar aqui
-  };
+
+    showToast(
+      "Pedido enviado com sucesso!",
+      "success"
+    );
+  } catch (error) {
+    console.log("Erro ao salvar pedido:", error);
+
+    showToast(
+      "Erro ao finalizar pedido",
+      "error"
+    );
+  }
+};
 
   const renderItem = ({ item }: { item: CarrinhoItem }) => (
     <View style={styles.itemCard}>

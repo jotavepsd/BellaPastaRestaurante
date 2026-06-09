@@ -7,6 +7,7 @@ import PerfilScreen from "../../src/screens/PerfilScreen";
 import CadastroProduto from "../../src/screens/CadastroProduto";
 import GerenciarProduto from "../../src/screens/GerenciarProduto";
 import Carrinho from "../../src/screens/Carrinho";
+import painelScreen from "../../src/screens/painelScreen";
 
 export type RootStackParamList = {
     HomeScreen: undefined;
@@ -16,7 +17,8 @@ export type RootStackParamList = {
     PerfilScreen: undefined;
     CadastroProduto: undefined;
     GerenciarProduto: undefined;
-    Carrinho: undefined
+    Carrinho: undefined;
+    painelScreen: undefined
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -57,6 +59,10 @@ export default function RootStack() {
         <Stack.Screen
                 name="Carrinho"
                 component={Carrinho}/>
+        
+        <Stack.Screen
+                name="painelScreen"
+                component={painelScreen}/>
             </Stack.Navigator>
 
 
