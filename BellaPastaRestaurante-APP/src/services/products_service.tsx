@@ -8,6 +8,11 @@ export const productService = {
   async create(product: Product) {
     const products = await getProdutos();
 
+console.log(
+  "TAMANHO PRODUTOS:",
+  JSON.stringify(products).length
+);
+
     const newProduct: Product = {
       ...product,
       id: Date.now().toString(),

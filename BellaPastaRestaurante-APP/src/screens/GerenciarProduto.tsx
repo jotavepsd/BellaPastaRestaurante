@@ -17,11 +17,11 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../app/(tabs)/index";
-import { database } from "../services/connectionFirebase";
-import { ref, onValue, update, remove } from "firebase/database";
+import { getProdutos } from "../services/jsonbinService";
 import { uploadImagem, deletarImagem } from "../services/uploadImageService";
 import * as ImagePicker from "expo-image-picker";
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { productService } from "../services/products_service";
 
 type NavProp = StackNavigationProp<RootStackParamList>;
 
@@ -53,39 +53,33 @@ export default function GerenciarProdutosScreen() {
   const [excluindo, setExcluindo] = useState(false);
   const [carregandoImagem, setCarregandoImagem] = useState(false);
 
-  useEffect(() => {
-    carregarProdutos();
-  }, []);
+useEffect(() => {
+  carregarProdutos();
+}, []);
 
-  const carregarProdutos = () => {
+const carregarProdutos = async () => {
+  try {
     setLoading(true);
-    const produtosRef = ref(database, "produtos");
-    
-    const unsubscribe = onValue(produtosRef, (snapshot) => {
-      const data = snapshot.val();
-      
-      if (data) {
-        const produtosList = Object.entries(data).map(([id, value]: [string, any]) => ({
-          id: id,
-          nome: value.nome || "",
-          descricao: value.descricao || "",
-          preco: value.preco || 0,
-          categoria: value.categoria || "",
-          imagem: value.imagem || null,
-        }));
-        setProdutos(produtosList);
-      } else {
-        setProdutos([]);
-      }
-      setLoading(false);
-    }, (error) => {
-      console.error("Erro ao carregar produtos:", error);
-      Alert.alert("Erro", "Falha ao carregar produtos: " + error.message);
-      setLoading(false);
-    });
 
-    return () => unsubscribe();
-  };
+    const lista = await productService.getAll();
+
+    const produtosFormatados = lista.map((produto) => ({
+      id: produto.id || "",
+      nome: produto.nome,
+      descricao: produto.descricao,
+      preco: produto.preco,
+      categoria: produto.categoria,
+      imagem: produto.imagemUrl || "",
+    }));
+
+    setProdutos(produtosFormatados);
+  } catch (error) {
+    console.log(error);
+    Alert.alert("Erro", "Não foi possível carregar os produtos");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const selecionarImagem = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -149,29 +143,33 @@ export default function GerenciarProdutosScreen() {
     setModalExclusaoVisible(true);
   };
 
-  const confirmarExclusao = async () => {
-    if (!produtoParaExcluir) return;
-    
+const confirmarExclusao = async () => {
+  if (!produtoParaExcluir) return;
+
+  try {
     setExcluindo(true);
-    
-    try {
-      if (produtoParaExcluir.imagem) {
-        await deletarImagem(produtoParaExcluir.imagem);
-      }
-      
-      const produtoRef = ref(database, `produtos/${produtoParaExcluir.id}`);
-      await remove(produtoRef);
-      
-      Alert.alert("Sucesso", "Produto excluído com sucesso!");
-      setModalExclusaoVisible(false);
-      setProdutoParaExcluir(null);
-    } catch (error: any) {
-      console.error("Erro detalhado ao excluir:", error);
-      Alert.alert("Erro", "Falha ao excluir produto. Verifique sua conexão e permissões.");
-    } finally {
-      setExcluindo(false);
-    }
-  };
+
+    await productService.delete(produtoParaExcluir.id);
+
+    Alert.alert(
+      "Sucesso",
+      "Produto excluído com sucesso!"
+    );
+
+    setModalExclusaoVisible(false);
+    carregarProdutos();
+
+  } catch (error) {
+    console.log(error);
+
+    Alert.alert(
+      "Erro",
+      "Não foi possível excluir o produto"
+    );
+  } finally {
+    setExcluindo(false);
+  }
+};
 
   const handleSalvarEdicao = async () => {
     if (!nome.trim()) {
@@ -213,18 +211,18 @@ export default function GerenciarProdutosScreen() {
         await deletarImagem(editandoProduto.imagem);
         imagemURL = "";
       }
-
-      const produtoRef = ref(database, `produtos/${editandoProduto?.id}`);
       
-      const dadosAtualizados: any = {
-        nome: nome.trim(),
-        descricao: descricao.trim(),
-        preco: precoNumerico,
-        categoria: categoria.trim(),
-        imagem: imagemURL,
-      };
       
-      await update(produtoRef, dadosAtualizados);
+await productService.update(
+  editandoProduto!.id,
+  {
+    nome: nome.trim(),
+    descricao: descricao.trim(),
+    preco: precoNumerico,
+    categoria: categoria.trim(),
+    imagemUrl: imagemURL,
+  }
+);
 
       Alert.alert("Sucesso", "Produto updated com sucesso!");
       setModalVisible(false);
@@ -785,3 +783,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+

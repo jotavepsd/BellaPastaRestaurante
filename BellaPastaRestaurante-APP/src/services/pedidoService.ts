@@ -15,23 +15,27 @@ export const pedidoService = {
     return await getPedidos();
   },
 
-  async create(itens: any[], subtotal: number, desconto: number) {
-    const pedidos = await getPedidos();
+async create(itens: any[], subtotal: number, desconto: number) {
+  const pedidos = await getPedidos();
 
-    const novoPedido: Pedido = {
-      id: Date.now().toString(),
-      data: new Date().toISOString(),
-      itens,
-      subtotal,
-      desconto,
-      total: subtotal - desconto,
-      status: "Pendente",
-    };
+  console.log("PEDIDOS ATUAIS:", pedidos);
 
-    pedidos.push(novoPedido);
+  const novoPedido = {
+    id: Date.now().toString(),
+    data: new Date().toISOString(),
+    itens,
+    subtotal,
+    desconto,
+    total: subtotal - desconto,
+    status: "Pendente",
+  };
 
-    await savePedidos(pedidos);
+  pedidos.push(novoPedido);
 
-    return novoPedido;
-  },
+  console.log("SALVANDO:", pedidos);
+
+  await savePedidos(pedidos);
+
+  return novoPedido;
+}
 };

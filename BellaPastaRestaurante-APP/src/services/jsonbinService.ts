@@ -58,11 +58,20 @@ export async function getPedidos() {
 }
 
 export async function savePedidos(pedidos: any[]) {
-  await axios.put(
-    `${BASE_URL}/${PEDIDOS_BIN_ID}`,
-    { pedidos },
-    { headers }
-  );
+  try {
+    const response = await axios.put(
+      `${BASE_URL}/${PEDIDOS_BIN_ID}`,
+      { pedidos },
+      { headers }
+    );
+
+    console.log("SUCESSO:", response.data);
+  } catch (error: any) {
+    console.log("ERRO COMPLETO JSONBIN:");
+    console.log(error.response?.status);
+    console.log(error.response?.data);
+    throw error;
+  }
 }
 
 export async function getNotificacoes() {
